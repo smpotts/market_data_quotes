@@ -8,5 +8,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OrderBookContext {
     public String symbol;
     public String pointInTime;
-    public int topResults;
 }

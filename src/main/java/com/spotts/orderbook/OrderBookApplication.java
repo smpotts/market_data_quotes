@@ -13,6 +13,5 @@ public class OrderBookApplication {
 		SpringApplication.run(OrderBookApplication.class, args);
 		// create a new order book
 		OrderBook orderBook = new OrderBook();
-
 	}
 }
