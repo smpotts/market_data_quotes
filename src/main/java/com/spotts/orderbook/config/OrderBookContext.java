@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "book")
 public class OrderBookContext {
-    public String symbol;
-    public String pointInTime;
+    private int resultLimit;
+    private final String filePath = "src/main/resources/quotes_2021-02-18.csv";
+    private final String[] headers = {"symbol", "marketCenter", "bidQuantity",
+            "askQuantity", "bidPrice", "askPrice", "startTime", "endTime",
+            "quoteConditions","sipfeedSeq" ,"sipfeed"};
 }

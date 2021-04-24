@@ -1,9 +1,12 @@
 package com.spotts.orderbook.service;
 
+import com.spotts.orderbook.config.OrderBookContext;
+import com.spotts.orderbook.model.OrderBook;
 import com.spotts.orderbook.model.Quote;
 import com.spotts.orderbook.util.OrderBookUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,18 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * The order book.
- */
 @Component
-public class OrderBook {
-    private final OrderBookUtil bookUtil = new OrderBookUtil();
-    private static final String filePath = "src/main/resources/quotes_2021-02-18.csv";
-    private static final String[] headers = {"symbol", "marketCenter", "bidQuantity",
-            "askQuantity", "bidPrice", "askPrice", "startTime", "endTime",
-            "quoteConditions","sipfeedSeq" ,"sipfeed"};
+public class OrderBookService {
+    @Autowired
+    private OrderBookContext context;
 
-    static List<Quote> fullOrderBook = new ArrayList<>();
+    private final OrderBookUtil bookUtil = new OrderBookUtil();
+    private final OrderBook orderBook = new OrderBook();
 
     @PostConstruct
     public void setUp() {
@@ -46,10 +44,11 @@ public class OrderBook {
      * @throws IOException thrown when there is an issue parsing the input data.
      */
     public void buildOrderBook() throws IOException, ParseException {
+        List<Quote> quoteList = new ArrayList<>();
         // set up the reader to iterate through csv records with a header in the file
-        Reader fileReader = new FileReader(filePath);
+        Reader fileReader = new FileReader(context.getFilePath());
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
-                .withHeader(headers)
+                .withHeader(context.getHeaders())
                 .withFirstRecordAsHeader()
                 .parse(fileReader);
 
@@ -69,8 +68,9 @@ public class OrderBook {
             newQuote.setSipFeed(record.get("sipfeed"));
 
             // add the new quote to the quotes on the book
-            fullOrderBook.add(newQuote);
+            quoteList.add(newQuote);
         }
+        orderBook.setFullOrderBook(quoteList);
     }
 
     /**
@@ -86,7 +86,7 @@ public class OrderBook {
         // create a timestamp from the input string
         Timestamp pointInTime = bookUtil.formatTimestamp(timestampString);
         // return live quotes on the book for the given symbol
-        return fullOrderBook
+        return orderBook.getFullOrderBook()
                 .stream()
                 .filter(q -> symbol.equals(q.getSymbol())
                         && (pointInTime.equals(q.getStartTime()) || pointInTime.after(q.getStartTime()))
@@ -98,11 +98,10 @@ public class OrderBook {
      * Gets the NBB quotes for a symbol at a point in time.
      * @param symbol The symbol
      * @param pointInTime The String timestamp of the point in time.
-     * @return an ordered list of nbb quotes in descending order i.e. highest
      * quotes first.
      * @throws ParseException thrown when there is an issue parsing the quotes
      */
-    private List<Quote> getNbbQuotes(String symbol, String pointInTime) throws ParseException {
+    private void captureNbbQuotes(String symbol, String pointInTime) throws ParseException {
         NbbQuoteComparator comparator = new NbbQuoteComparator();
         List<Quote> nbbLiveQuotes = getLiveQuotes(symbol, pointInTime);
 
@@ -110,27 +109,25 @@ public class OrderBook {
         if (nbbLiveQuotes != null) {
             nbbLiveQuotes.sort(comparator.reversed());
         }
-        return nbbLiveQuotes;
+        orderBook.setNbbQuotes(nbbLiveQuotes);
     }
 
     /**
      * Gets the NBO quotes for a symbol at a point in time.
      * @param symbol The symbol
      * @param pointInTime The String timestamp of the point in time
-     * @return an ordered list of nbo quotes in ascending order i.e. lowest
      * quote first.
      * @throws ParseException thrown when there is an issue parsing
      */
-    private List<Quote> getNboQuotes(String symbol, String pointInTime) throws ParseException {
+    private void captureNboQuotes(String symbol, String pointInTime) throws ParseException {
         NboQuoteComparator comparator = new NboQuoteComparator();
-        List<Quote> nboRankedQuotes = getLiveQuotes(symbol, pointInTime);
+        List<Quote> nboLiveQuotes = getLiveQuotes(symbol, pointInTime);
 
         // sort the quotes with best (lowest) asks first
-        if (nboRankedQuotes != null) {
-            nboRankedQuotes.sort(comparator);
+        if (nboLiveQuotes != null) {
+            nboLiveQuotes.sort(comparator);
         }
-
-        return nboRankedQuotes;
+        orderBook.setNboQuotes(nboLiveQuotes);
     }
 
     /**
@@ -141,18 +138,22 @@ public class OrderBook {
      * @throws ParseException thrown when there is an issue parsing
      */
     public String pointInTimeResults(String symbol, String pointInTime) throws ParseException {
-        StringBuilder strBuilder = new StringBuilder();
-
         // get the top 5 nbb quotes from the ordered list
-        List<Quote> nbbQuotes = getNbbQuotes(symbol, pointInTime);
-        List<Quote> topNbbQuotes = nbbQuotes.subList(0, 5);
+        captureNbbQuotes(symbol, pointInTime);
+        List<Quote> topNbbQuotes = orderBook.getNbbQuotes().subList(0, context.getResultLimit());
 
         // get the top 5 nbo quotes from the ordered list
-        List<Quote> nboQuotes = getNboQuotes(symbol, pointInTime);
-        List<Quote> topNboQuotes = nboQuotes.subList(0, 5);
+        captureNboQuotes(symbol, pointInTime);
+        List<Quote> topNboQuotes = orderBook.getNboQuotes().subList(0, context.getResultLimit());
+
+        return buildOutputString(symbol, pointInTime, topNbbQuotes, topNboQuotes);
+    }
+
+    private String buildOutputString(String symbol, String pointInTime, List<Quote> topNbbQuotes, List<Quote> topNboQuotes) {
+        StringBuilder strBuilder = new StringBuilder();
 
         // append the symbol and time pieces to the string builder
-        strBuilder.append("$").append(symbol).append(" (").append(pointInTime).append(")").append("\n");
+        strBuilder.append("$").append(symbol).append(" (").append(pointInTime).append(")").append("<br />\n");
         // append the best bids
         strBuilder.append("Best Bids: ");
 
@@ -161,11 +162,10 @@ public class OrderBook {
         }
 
         // append the best asks to the string
-        strBuilder.append("\n").append("Best Asks: ");
+        strBuilder.append("<br />\n").append("Best Asks: ");
         for (Quote quote : topNboQuotes) {
             strBuilder.append(quote.getAskPrice()).append("(").append(quote.getAskQuantity()).append("); ");
         }
-        System.out.println(strBuilder.toString());
-        return strBuilder.toString().replace("\n", "<br />\n");
+        return strBuilder.toString();
     }
 }
