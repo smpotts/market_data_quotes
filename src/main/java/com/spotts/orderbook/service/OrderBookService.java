@@ -21,17 +21,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The OrderBookService.
+ */
 @Component
 public class OrderBookService {
-    @Autowired
-    private OrderBookContext context;
-
     private final OrderBookUtil bookUtil = new OrderBookUtil();
     private final OrderBook orderBook = new OrderBook();
+
+    @Autowired
+    private OrderBookContext context;
 
     @PostConstruct
     public void setUp() {
         try {
+            // build the order book
             buildOrderBook();
         } catch(Exception e) {
             e.printStackTrace();
@@ -42,6 +46,7 @@ public class OrderBookService {
      * Builds the full order book by parsing the quote input data and
      * adding it to the book.
      * @throws IOException thrown when there is an issue parsing the input data.
+     * @throws ParseException thrown when there is an issue parsing the timestamp String
      */
     public void buildOrderBook() throws IOException, ParseException {
         List<Quote> quoteList = new ArrayList<>();
@@ -67,25 +72,26 @@ public class OrderBookService {
             newQuote.setSipFeedSeq(record.get("sipfeedSeq"));
             newQuote.setSipFeed(record.get("sipfeed"));
 
-            // add the new quote to the quotes on the book
+            // add the new quote to the quote list
             quoteList.add(newQuote);
         }
+        // put the quote list on the full order book
         orderBook.setFullOrderBook(quoteList);
     }
 
     /**
-     * Gets the quotes from the full order book for a symbol that were live
-     * given the point in time.
+     * Gets the quotes from the full order book for a given symbol that were live
+     * at that point in time.
      * @param symbol The symbol
      * @param timestampString The String timestamp point in time.
      * @return The quotes that were live on the book for that symbol at that
      * time.
-     * @throws ParseException thrown when there is an issue parsing the quotes
+     * @throws ParseException thrown when there is an issue parsing the timestamp String
      */
     private List<Quote> getLiveQuotes(String symbol, String timestampString) throws ParseException {
         // create a timestamp from the input string
         Timestamp pointInTime = bookUtil.formatTimestamp(timestampString);
-        // return live quotes on the book for the given symbol
+        // return live quotes on the book for the given symbol and time period
         return orderBook.getFullOrderBook()
                 .stream()
                 .filter(q -> symbol.equals(q.getSymbol())
@@ -95,11 +101,11 @@ public class OrderBookService {
     }
 
     /**
-     * Gets the NBB quotes for a symbol at a point in time.
+     * Captures the National Best Bid (nbb) quotes on the order book given a
+     * symbol and point in time.
      * @param symbol The symbol
      * @param pointInTime The String timestamp of the point in time.
-     * quotes first.
-     * @throws ParseException thrown when there is an issue parsing the quotes
+     * @throws ParseException thrown when there is an issue parsing the pointInTime
      */
     private void captureNbbQuotes(String symbol, String pointInTime) throws ParseException {
         NbbQuoteComparator comparator = new NbbQuoteComparator();
@@ -113,11 +119,11 @@ public class OrderBookService {
     }
 
     /**
-     * Gets the NBO quotes for a symbol at a point in time.
+     * Captures the National Best Offer (nbo) quotes on the order book given a
+     * symbol and point in time.
      * @param symbol The symbol
-     * @param pointInTime The String timestamp of the point in time
-     * quote first.
-     * @throws ParseException thrown when there is an issue parsing
+     * @param pointInTime The String timestamp of the point in time.
+     * @throws ParseException thrown when there is an issue parsing the pointInTime
      */
     private void captureNboQuotes(String symbol, String pointInTime) throws ParseException {
         NboQuoteComparator comparator = new NboQuoteComparator();
@@ -132,24 +138,26 @@ public class OrderBookService {
 
     /**
      * Gets the point in time best bids and asks for a given timestamp and symbol.
-     * @param symbol The symbol to analyze
-     * @param pointInTime The point in time
+     * @param symbol The symbol
+     * @param pointInTime The String timestamp of the point in time.
      * @return The formatted String with the input data and best bids and asks
      * @throws ParseException thrown when there is an issue parsing
      */
     public String pointInTimeResults(String symbol, String pointInTime) throws ParseException {
-        // get the top 5 nbb quotes from the ordered list
+        // get the top nbb quotes from the ordered list
         captureNbbQuotes(symbol, pointInTime);
         List<Quote> topNbbQuotes = orderBook.getNbbQuotes().subList(0, context.getResultLimit());
 
-        // get the top 5 nbo quotes from the ordered list
+        // get the top nbo quotes from the ordered list
         captureNboQuotes(symbol, pointInTime);
         List<Quote> topNboQuotes = orderBook.getNboQuotes().subList(0, context.getResultLimit());
 
-        return buildOutputString(symbol, pointInTime, topNbbQuotes, topNboQuotes);
+        // return the formatted output String
+        return formatOutputString(symbol, pointInTime, topNbbQuotes, topNboQuotes);
     }
 
-    private String buildOutputString(String symbol, String pointInTime, List<Quote> topNbbQuotes, List<Quote> topNboQuotes) {
+    private String formatOutputString(String symbol, String pointInTime,
+                                      List<Quote> topNbbQuotes, List<Quote> topNboQuotes) {
         StringBuilder strBuilder = new StringBuilder();
 
         // append the symbol and time pieces to the string builder
@@ -157,12 +165,15 @@ public class OrderBookService {
         // append the best bids
         strBuilder.append("Best Bids: ");
 
+        // append the top nbb quotes to the output string
         for (Quote quote : topNbbQuotes) {
             strBuilder.append(quote.getBidPrice()).append("(").append(quote.getBidQuantity()).append("); ");
         }
 
-        // append the best asks to the string
+        // append the best asks
         strBuilder.append("<br />\n").append("Best Asks: ");
+
+        // append the top nbo quotes to the output string
         for (Quote quote : topNboQuotes) {
             strBuilder.append(quote.getAskPrice()).append("(").append(quote.getAskQuantity()).append("); ");
         }

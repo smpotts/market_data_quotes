@@ -3,6 +3,9 @@ package com.spotts.orderbook.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * The Context for the OrderBook.
+ */
 @Data
 @ConfigurationProperties(prefix = "book")
 public class OrderBookContext {

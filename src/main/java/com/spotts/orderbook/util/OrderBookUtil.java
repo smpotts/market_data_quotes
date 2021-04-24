@@ -5,6 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Utility class for the OrderBook.
+ */
 public class OrderBookUtil {
     private static final String inputTsPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final String outputTsPattern = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -13,7 +16,7 @@ public class OrderBookUtil {
      * Formats the timestamp String from the quotes file into a Timestamp object
      * @param timestampString the timestamp String
      * @return a Timestamp object created from the timestampString
-     * @throws ParseException thrown when there is an issue parsing
+     * @throws ParseException thrown when there is an issue parsing the timestampString
      */
     public Timestamp formatTimestamp(String timestampString) throws ParseException {
         SimpleDateFormat inputFormat = new SimpleDateFormat(inputTsPattern);

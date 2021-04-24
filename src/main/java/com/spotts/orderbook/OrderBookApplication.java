@@ -1,6 +1,5 @@
 package com.spotts.orderbook;
 
-import com.spotts.orderbook.model.OrderBook;
 import com.spotts.orderbook.config.OrderBookContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,7 +11,5 @@ public class OrderBookApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(OrderBookApplication.class, args);
-		// create a new order book
-		OrderBook orderBook = new OrderBook();
 	}
 }

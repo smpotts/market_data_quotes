@@ -5,7 +5,7 @@ import com.spotts.orderbook.model.Quote;
 import java.util.Comparator;
 
 /**
- * Comparator for comparing the bidPrice between two quotes.
+ * Comparator for comparing the bidPrice between two Quotes.
  */
 public class NbbQuoteComparator implements Comparator<Quote> {
 

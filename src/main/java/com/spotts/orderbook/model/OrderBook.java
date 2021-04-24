@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The order book.
+ * The OrderBook: a list of buy and sell orders for a security
+ * or instrument organized by price & time.
  */
 @Data
 public class OrderBook {
