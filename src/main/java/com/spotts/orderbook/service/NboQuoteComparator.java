@@ -1,4 +1,6 @@
-package com.spotts.orderbook.book;
+package com.spotts.orderbook.service;
+
+import com.spotts.orderbook.model.Quote;
 
 import java.util.Comparator;
 

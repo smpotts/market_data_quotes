@@ -1,6 +1,7 @@
 package com.spotts.orderbook;
 
-import com.spotts.orderbook.book.OrderBook;
+import com.spotts.orderbook.service.OrderBook;
+import com.spotts.orderbook.config.OrderBookContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

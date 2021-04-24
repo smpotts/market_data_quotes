@@ -1,6 +1,6 @@
-package com.spotts.orderbook;
+package com.spotts.orderbook.controller;
 
-import com.spotts.orderbook.book.OrderBook;
+import com.spotts.orderbook.service.OrderBook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

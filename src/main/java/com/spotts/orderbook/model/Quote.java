@@ -1,4 +1,4 @@
-package com.spotts.orderbook.book;
+package com.spotts.orderbook.model;
 
 import lombok.Data;
 

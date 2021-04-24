@@ -1,4 +1,4 @@
-package com.spotts.orderbook;
+package com.spotts.orderbook.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

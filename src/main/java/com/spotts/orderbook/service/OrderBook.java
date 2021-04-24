@@ -1,5 +1,7 @@
-package com.spotts.orderbook.book;
+package com.spotts.orderbook.service;
 
+import com.spotts.orderbook.model.Quote;
+import com.spotts.orderbook.util.OrderBookUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
@@ -12,9 +14,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
  */
 @Component
 public class OrderBook {
-    private static final String inputTsPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    private static final String outputTsPattern = "yyyy-MM-dd HH:mm:ss.SSS";
+    private final OrderBookUtil bookUtil = new OrderBookUtil();
     private static final String filePath = "src/main/resources/quotes_2021-02-18.csv";
     private static final String[] headers = {"symbol", "marketCenter", "bidQuantity",
             "askQuantity", "bidPrice", "askPrice", "startTime", "endTime",
@@ -63,8 +62,8 @@ public class OrderBook {
             newQuote.setAskQuantity(new BigInteger(record.get("askQuantity")));
             newQuote.setBidPrice(new BigDecimal(record.get("bidPrice")));
             newQuote.setAskPrice(new BigDecimal(record.get("askPrice")));
-            newQuote.setStartTime(formatTimestamp(record.get("startTime")));
-            newQuote.setEndTime(formatTimestamp(record.get("endTime")));
+            newQuote.setStartTime(bookUtil.formatTimestamp(record.get("startTime")));
+            newQuote.setEndTime(bookUtil.formatTimestamp(record.get("endTime")));
             newQuote.setQuoteConditions(record.get("quoteConditions"));
             newQuote.setSipFeedSeq(record.get("sipfeedSeq"));
             newQuote.setSipFeed(record.get("sipfeed"));
@@ -85,7 +84,7 @@ public class OrderBook {
      */
     private List<Quote> getLiveQuotes(String symbol, String timestampString) throws ParseException {
         // create a timestamp from the input string
-        Timestamp pointInTime = formatTimestamp(timestampString);
+        Timestamp pointInTime = bookUtil.formatTimestamp(timestampString);
         // return live quotes on the book for the given symbol
         return fullOrderBook
                 .stream()
@@ -168,19 +167,5 @@ public class OrderBook {
         }
         System.out.println(strBuilder.toString());
         return strBuilder.toString().replace("\n", "<br />\n");
-    }
-
-    /**
-     * Formats the timestamp String from the quotes file into a Timestamp object
-     * @param timestampString the timestamp String
-     * @return a Timestamp object created from the timestampString
-     * @throws ParseException thrown when there is an issue parsing
-     */
-    private static Timestamp formatTimestamp(String timestampString) throws ParseException {
-        SimpleDateFormat inputFormat = new SimpleDateFormat(inputTsPattern);
-        SimpleDateFormat outputFormat = new SimpleDateFormat(outputTsPattern);
-        Date parsedDate = inputFormat.parse(timestampString);
-        String formattedTime = outputFormat.format(parsedDate);
-        return Timestamp.valueOf(formattedTime);
     }
 }
