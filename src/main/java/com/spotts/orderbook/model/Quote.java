@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 /**
  * A Quote: the most recent price that a buyer and seller agreed upon
- * and at which some amount of the asset was transacted.
+ * and at which some amount of the asset transacted.
  */
 @Data
 public class Quote {
