@@ -37,10 +37,11 @@ The point in time results will display in the webpage like this:
 
 #### Future Enhancements
 With more time, here are some future enhancements I would add to the project:
-1. Adding more unit tests
+1. Adding unit tests
 2. Reading the quotes from a stream instead of a .csv file
 3. Be able to interact with the REST API more and have the user input values from the webpage
-4. Change the output results from a formatted String to an Object 
+4. Change the output results from a formatted String to an Object
+5. Parse the input Timestamps differently
 
 #### Final Thoughts
 This project presented a number of interesting and challenging problems, and I learned a lot along the way. Thanks for reading!
