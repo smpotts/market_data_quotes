@@ -16,7 +16,7 @@ National Best Bid (NBB): the best bid(s) on the top of the book.
 National Best Offer (NBO): the best offer(s) on the top of the book. 
 
 ### Run the Order Book
-To run the order book, walk through the following steps
+To run the order book, walk through the following steps:
 1. Go to the project run configurations, and choose "OrderBookApplication" as the Main Class.
 
 [![run-configs.png](https://i.postimg.cc/g2DSQxz4/run-configs.png)](https://postimg.cc/v44t6H66)
@@ -24,6 +24,7 @@ To run the order book, walk through the following steps
 2. Next, open the OrderBookController class and put a symbol and timestamp String as arguments into the pointInTimeResults method. These are the inputs the Order Book will use to see what was on the book for that symbol and timestamp.
 
 [![controller-args.png](https://i.postimg.cc/TYSgwGkG/controller-args.png)](https://postimg.cc/rK1KZ6XY)
+
 NOTE: The timestamp needs to be in the format "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'".
 
 3. Run "mvn clean install" on the root directory of the repository to build the project.
