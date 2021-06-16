@@ -1,6 +1,6 @@
 package com.spotts.orderbook.service;
 
-import com.spotts.orderbook.config.OrderBookContext;
+import com.spotts.orderbook.context.OrderBookContext;
 import com.spotts.orderbook.model.OrderBook;
 import com.spotts.orderbook.model.Quote;
 import com.spotts.orderbook.util.OrderBookUtil;
@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 @Component
 public class OrderBookService {
     private final OrderBookUtil bookUtil = new OrderBookUtil();
-    private final OrderBook orderBook = new OrderBook();
+    public final OrderBook orderBook = new OrderBook();
 
     @Autowired
-    private OrderBookContext context;
+    public OrderBookContext context;
 
     @PostConstruct
     public void setUp() {
@@ -53,7 +53,7 @@ public class OrderBookService {
         // set up the reader to iterate through csv records with a header in the file
         Reader fileReader = new FileReader(context.getFilePath());
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
-                .withHeader(context.getHeaders())
+                .withHeader(OrderBookContext.HEADERS)
                 .withFirstRecordAsHeader()
                 .parse(fileReader);
 
