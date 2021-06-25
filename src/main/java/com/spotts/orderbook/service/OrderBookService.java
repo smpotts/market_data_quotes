@@ -6,7 +6,6 @@ import com.spotts.orderbook.model.Quote;
 import com.spotts.orderbook.util.OrderBookUtil;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +27,13 @@ import java.util.stream.Collectors;
 public class OrderBookService {
     private final OrderBookUtil bookUtil = new OrderBookUtil();
     public final OrderBook orderBook = new OrderBook();
+    private final String filePath;
+    private final int resultLimit;
 
-    @Autowired
-    public OrderBookContext context;
+    public OrderBookService(OrderBookContext context) {
+        filePath = context.getFilePath();
+        resultLimit = context.getResultLimit();
+    }
 
     @PostConstruct
     public void setUp() {
@@ -51,7 +54,7 @@ public class OrderBookService {
     public void buildOrderBook() throws IOException, ParseException {
         List<Quote> quoteList = new ArrayList<>();
         // set up the reader to iterate through csv records with a header in the file
-        Reader fileReader = new FileReader(context.getFilePath());
+        Reader fileReader = new FileReader(filePath);
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
                 .withHeader(OrderBookContext.HEADERS)
                 .withFirstRecordAsHeader()
@@ -146,11 +149,11 @@ public class OrderBookService {
     public String pointInTimeResults(String symbol, String pointInTime) throws ParseException {
         // get the top nbb quotes from the ordered list
         captureNbbQuotes(symbol, pointInTime);
-        List<Quote> topNbbQuotes = orderBook.getNbbQuotes().subList(0, context.getResultLimit());
+        List<Quote> topNbbQuotes = orderBook.getNbbQuotes().subList(0, resultLimit);
 
         // get the top nbo quotes from the ordered list
         captureNboQuotes(symbol, pointInTime);
-        List<Quote> topNboQuotes = orderBook.getNboQuotes().subList(0, context.getResultLimit());
+        List<Quote> topNboQuotes = orderBook.getNboQuotes().subList(0, resultLimit);
 
         // return the formatted output String
         return formatOutputString(symbol, pointInTime, topNbbQuotes, topNboQuotes);

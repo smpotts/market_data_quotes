@@ -9,9 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "book")
 public class OrderBookContext {
-    private int resultLimit;
-    private final String filePath = "src/main/resources/quotes_2021-02-18.csv";
     public static final String[] HEADERS = {"symbol", "marketCenter", "bidQuantity",
             "askQuantity", "bidPrice", "askPrice", "startTime", "endTime",
             "quoteConditions","sipfeedSeq" ,"sipfeed"};
+    private int resultLimit;
+    private String filePath;
 }
