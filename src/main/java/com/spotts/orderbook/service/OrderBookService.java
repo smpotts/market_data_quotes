@@ -91,7 +91,7 @@ public class OrderBookService {
      * time.
      * @throws ParseException thrown when there is an issue parsing the timestamp String
      */
-    private List<Quote> getLiveQuotes(String symbol, String timestampString) throws ParseException {
+    public List<Quote> getLiveQuotes(String symbol, String timestampString) throws ParseException {
         // create a timestamp from the input string
         Timestamp pointInTime = bookUtil.formatTimestamp(timestampString);
         // return live quotes on the book for the given symbol and time period
@@ -110,7 +110,7 @@ public class OrderBookService {
      * @param pointInTime The String timestamp of the point in time.
      * @throws ParseException thrown when there is an issue parsing the pointInTime
      */
-    private void captureNbbQuotes(String symbol, String pointInTime) throws ParseException {
+    public void captureNbbQuotes(String symbol, String pointInTime) throws ParseException {
         NbbQuoteComparator comparator = new NbbQuoteComparator();
         List<Quote> nbbLiveQuotes = getLiveQuotes(symbol, pointInTime);
 
@@ -128,7 +128,7 @@ public class OrderBookService {
      * @param pointInTime The String timestamp of the point in time.
      * @throws ParseException thrown when there is an issue parsing the pointInTime
      */
-    private void captureNboQuotes(String symbol, String pointInTime) throws ParseException {
+    public void captureNboQuotes(String symbol, String pointInTime) throws ParseException {
         NboQuoteComparator comparator = new NboQuoteComparator();
         List<Quote> nboLiveQuotes = getLiveQuotes(symbol, pointInTime);
 
