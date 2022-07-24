@@ -1,12 +1,12 @@
 # Order Book
 
-### Overview
-This project builds a point in time order book and displays the 5 best bid and 5 best ask prices given any symbol and point in time timestamp.
+## Overview
+This project builds a point in time order book with public market data quotes and displays the 5 best bid and 5 best ask prices given any symbol and point in time timestamp.
 
-#### Technologies
+### Technologies
 The project is written in Java (v. 11.0.8) using the Spring Boot framework (v. 2.4.5).
 
-#### Relevant Terminology
+### Relevant Terminology
 Order Book:  a list of buy and sell orders for a security or instrument organized by price & time.
 
 Quote: the most recent price that a buyer and seller agreed upon and at which some amount of the asset transacted. 
@@ -15,7 +15,7 @@ National Best Bid (NBB): the best bid(s) on the top of the book.
 
 National Best Offer (NBO): the best offer(s) on the top of the book. 
 
-### Run the Order Book
+### Running the Order Book
 To run the order book, walk through the following steps:
 1. Go to the project run configurations, and choose "OrderBookApplication" as the Main Class.
 
